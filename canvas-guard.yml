@@ -1,0 +1,32 @@
+name: Canvas Guard
+
+on:
+  pull_request:
+    paths:
+      - 'canvas.md'
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Run guard
+        env:
+          CANVAS_PATH: canvas.md
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
+        run: |
+          python .github/scripts/zfep_guard.py
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Canvas Guard Result" >> $GITHUB_STEP_SUMMARY
+          echo "- Base: $GITHUB_BASE_REF" >> $GITHUB_STEP_SUMMARY
+          echo "- Head: $GITHUB_HEAD_REF" >> $GITHUB_STEP_SUMMARY
